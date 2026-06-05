@@ -1,0 +1,371 @@
+---
+title: "Dataset Dictionary — Monday-6:30pm Group"
+subtitle: "Intro to R for Data Science with LLMs — Workshop 2026"
+format:
+  html:
+    toc: true
+    code-fold: true
+    embed-resources: true
+execute:
+  echo: true
+  message: false
+  warning: false
+---
+
+```{r}
+library(tidyverse)
+```
+
+This document describes every CSV file in the `data/` folder: what one row
+represents, and what each column means.  The datasets belong to four separate
+projects:
+
+1. **Group A — Yogurt intervention** (`data/group_a_yogurt/`)
+2. **Group B — Menstruation study** (`data/group_b_menstruation/`)
+3. **Instructional dataset — UKZN workshop 2023** (`data/instructional_dataset/`)
+4. **Modeling — Sorghum time‑course** (`data/modeling/`)
+
+---
+
+# Group A — Yogurt intervention {#sec-yogurt}
+
+## `00_sample_ids_yogurt.csv`
+
+```{r}
+sample_ids_yogurt <- read_csv("../data/group_a_yogurt/00_sample_ids_yogurt.csv")
+glimpse(sample_ids_yogurt)
+```
+
+**One row =** one biological sample collected from a participant at one visit.
+
+| Column       | Type     | Meaning |
+|--------------|----------|---------|
+| `pid`        | character | Participant ID (e.g. `pid_25`). Links to `01_participant_metadata_yogurt.csv`. |
+| `time_point` | character | When the sample was taken: `baseline` (before any intervention) or `after_antibiotic` (after a course of antibiotics). |
+| `arm`        | character | Study group: `yogurt` (received yogurt) or `unchanged_diet` (control). |
+| `sample_id`  | character | Unique barcode for the lab sample (e.g. `UNCH001`, `YOG002`). Links to the qPCR and Luminex results. |
+
+---
+
+## `01_participant_metadata_yogurt.csv`
+
+```{r}
+meta_yogurt <- read_csv("../data/group_a_yogurt/01_participant_metadata_yogurt.csv")
+glimpse(meta_yogurt)
+```
+
+**One row =** one participant enrolled in the yogurt study.
+
+| Column              | Type     | Meaning |
+|---------------------|----------|---------|
+| `pid`               | character | Participant ID. Links to `00_sample_ids_yogurt.csv`. |
+| `arm`               | character | Study arm: `yogurt` or `unchanged_diet`. |
+| `days_since_last_sex` | numeric | Days since last sexual intercourse reported at enrolment. |
+| `birth_control`     | character | Birth‑control method: `Depoprovera` (injectable), `no hormonal birth control`. |
+| `age`               | numeric | Age in years. |
+| `education`         | character | Highest education level: `less than grade 9` / `grade 10-12, not matriculated` / `post-secondary` / etc. |
+| `sex`               | character | Self‑reported sex (`female` for all participants). |
+
+---
+
+## `02_qpcr_results_yogurt.csv`
+
+```{r}
+qpcr_yogurt <- read_csv("../data/group_a_yogurt/02_qpcr_results_yogurt.csv")
+glimpse(qpcr_yogurt)
+```
+
+**One row =** qPCR measurements from one sample for three bacterial targets.
+
+| Column             | Type     | Meaning |
+|--------------------|----------|---------|
+| `sample_id`        | character | Sample barcode. Links to `00_sample_ids_yogurt.csv`. |
+| `qpcr_bacteria`    | numeric  | Total bacterial load (16S rRNA gene copies). |
+| `qpcr_crispatus`   | numeric  | *Lactobacillus crispatus* — a beneficial vaginal species (gene copies). |
+| `qpcr_iners`       | numeric  | *Lactobacillus iners* — another *Lactobacillus* species (gene copies). |
+
+These numbers reflect the absolute abundance of each target. A value of `0`
+means the target was not detected.
+
+---
+
+## `03_luminex_results_yogurt.csv`
+
+```{r}
+luminex_yogurt <- read_csv("../data/group_a_yogurt/03_luminex_results_yogurt.csv")
+glimpse(luminex_yogurt)
+```
+
+**One row =** the concentration of one **cytokine** measured in one sample by
+Luminex multiplex assay.
+
+| Column      | Type     | Meaning |
+|-------------|----------|---------|
+| `sample_id` | character | Sample barcode. Links to `00_sample_ids_yogurt.csv`. |
+| `cytokine`  | character | Name of the cytokine / chemokine measured (e.g. `IL-1a`, `IL-6`, `TNFa`, `IFN-Y`, `IP-10`, `MIG`, `MIP-3a`, `IL-8`, `IL-10`, `IL-1b`). |
+| `conc`      | numeric  | Concentration (pg/mL). |
+| `limits`    | character | Whether the value was `within limits` (reliable) or `out of range` (below/above the standard curve). |
+
+Because the data is in **long format**, each sample appears in multiple rows —
+one per cytokine.
+
+---
+
+# Group B — Menstruation study {#sec-menstruation}
+
+## `00_sample_ids_period.csv`
+
+```{r}
+sample_ids_period <- read_csv("../data/group_b_menstruation/00_sample_ids_period.csv")
+glimpse(sample_ids_period)
+```
+
+**One row =** one biological sample collected during the menstrual cycle study.
+
+| Column       | Type     | Meaning |
+|--------------|----------|---------|
+| `pid`        | character | Participant ID (e.g. `pid_12`). Links to `01_participant_metadata_period.csv`. |
+| `time_point` | character | Menstrual‑cycle visit: `week_prior`, `onset`, `end_bleeding`, `week_post`. |
+| `arm`        | character | Study group: `birth_control` (using hormonal contraception) or `no_birth_control`. |
+| `sample_id`  | character | Unique barcode for the lab sample (e.g. `SAMP001`). Links to Luminex and flow cytometry results. |
+
+---
+
+## `01_participant_metadata_period.csv`
+
+```{r}
+meta_period <- read_csv("../data/group_b_menstruation/01_participant_metadata_period.csv")
+glimpse(meta_period)
+```
+
+**One row =** one participant enrolled in the menstruation study.
+
+| Column           | Type     | Meaning |
+|------------------|----------|---------|
+| `pid`            | character | Participant ID. Links to `00_sample_ids_period.csv`. |
+| `arm`            | character | `birth_control` or `no_birth_control`. |
+| `age`            | numeric  | Age in years. |
+| `pcos_status`    | character | Polycystic ovary syndrome: `pcos` or `no disease`. |
+| `period_product` | character | Menstrual product used: `tampon`, `menstrual_cup`, or `pad`. |
+| `sex`            | character | Self‑reported sex (`female`). |
+
+---
+
+## `02_luminex_period.csv`
+
+```{r}
+luminex_period <- read_csv("../data/group_b_menstruation/02_luminex_period.csv")
+glimpse(luminex_period)
+```
+
+**One row =** the concentration of one **cytokine** measured in one sample.
+
+| Column      | Type     | Meaning |
+|-------------|----------|---------|
+| `sample_id` | character | Sample barcode. Links to `00_sample_ids_period.csv`. |
+| `cytokine`  | character | Name of the analyte: `IL-1a`, `IL-1b`, `IL-6`, `TNFa`, `IFNg`, `IP-10`, `MIG`, `MIP-3a`. |
+| `conc`      | numeric  | Concentration (pg/mL, Luminex assay). |
+| `limits`    | character | Detection status: `not_censored` (reliable), `below_detection_limit`, or `above_detect_limit`. |
+
+Again, **long format** — one row per cytokine per sample.
+
+---
+
+## `03_flow_cytometry_period.csv`
+
+```{r}
+flow_period <- read_csv("../data/group_b_menstruation/03_flow_cytometry_period.csv")
+glimpse(flow_period)
+```
+
+**One row =** the immune‑cell counts from one sample, measured by flow
+cytometry.
+
+| Column               | Type     | Meaning |
+|----------------------|----------|---------|
+| `sample_id`          | character | Sample barcode. Links to `00_sample_ids_period.csv`. |
+| `live_cd19_negative` | numeric  | Total live cells minus CD19⁺ (B‑cell) events — a starting gate. |
+| `cd45_negative`      | numeric  | Cells that are CD45⁻ (not leukocytes). |
+| `cd45_positive`      | numeric  | Cells that are CD45⁺ (leukocytes / white blood cells). |
+| `neutrophils`        | numeric  | Neutrophil count (a type of innate immune cell). |
+| `non_neutrophils`    | numeric  | CD45⁺ cells that are not neutrophils. |
+| `cd3_negative`       | numeric  | CD45⁺ cells that are CD3⁻ (not T‑cells). |
+| `cd3_positive`       | numeric  | CD45⁺ cells that are CD3⁺ (T‑cells). |
+| `cd4_t_cells`        | numeric  | CD4⁺ helper T‑cells (a subset of CD3⁺). |
+| `cd8_t_cells`        | numeric  | CD8⁺ cytotoxic T‑cells (a subset of CD3⁺). |
+
+All values are **absolute cell counts** (number of events).
+
+---
+
+# Instructional dataset — UKZN workshop 2023 {#sec-instructional}
+
+## `00_sample_ids_UKZN_workshop_2023.csv`
+
+```{r}
+sample_ids_inst <- read_csv("../data/instructional_dataset/00_sample_ids_UKZN_workshop_2023.csv")
+glimpse(sample_ids_inst)
+```
+
+**One row =** one biological sample from a vaginal microbiome study (original
+UKZN 2023 workshop dataset).
+
+| Column       | Type     | Meaning |
+|--------------|----------|---------|
+| `pid`        | character | Participant ID. Links to `01_participant_metadata_UKZN_workshop_2023.csv`. |
+| `time_point` | character | Study visit: `baseline`, `week_1`, or `week_7`. |
+| `arm`        | character | `placebo` (control) or `treatment`. |
+| `sample_id`  | character | Lab barcode (e.g. `SAMP001`). Links to ELISA and flow results. |
+
+---
+
+## `01_participant_metadata_UKZN_workshop_2023.csv`
+
+```{r}
+meta_inst <- read_csv("../data/instructional_dataset/01_participant_metadata_UKZN_workshop_2023.csv")
+glimpse(meta_inst)
+```
+
+**One row =** one participant.
+
+| Column     | Type     | Meaning |
+|------------|----------|---------|
+| `pid`      | character | Participant ID. |
+| `arm`      | character | `placebo` or `treatment`. |
+| `smoker`   | character | Smoking status: `smoker` / `non-smoker`. |
+| `age`      | numeric  | Age in years. |
+| `education`| character | Education level: `less than grade 9`, `grade 10-12, matriculated`, `post-secondary`, etc. |
+| `sex`      | character | `F` (female). |
+
+---
+
+## `02_visit_clinical_measurements_UKZN_workshop_2023.csv`
+
+```{r}
+clinical_inst <- read_csv("../data/instructional_dataset/02_visit_clinical_measurements_UKZN_workshop_2023.csv")
+glimpse(clinical_inst)
+```
+
+**One row =** one clinical assessment from one participant at one visit.
+
+| Column       | Type     | Meaning |
+|--------------|----------|---------|
+| `pid`        | character | Participant ID. |
+| `time_point` | character | Visit: `baseline`, `week_1`, `week_7`. |
+| `arm`        | character | `placebo` or `treatment`. |
+| `nugent_score`| numeric | **Nugent score** (0–10) — a measure of vaginal microbiome health; higher = more disturbed. |
+| `crp_blood`  | numeric  | C‑reactive protein in blood (mg/L) — a marker of systemic inflammation. |
+| `ph`         | numeric  | Vaginal pH. |
+
+---
+
+## `03_elisa_cytokines_UKZN_workshop_2023.csv`
+
+```{r}
+elisa_inst <- read_csv("../data/instructional_dataset/03_elisa_cytokines_UKZN_workshop_2023.csv")
+glimpse(elisa_inst)
+```
+
+**One row =** the concentration of one **cytokine** measured in one sample by
+ELISA.
+
+| Column      | Type     | Meaning |
+|-------------|----------|---------|
+| `sample_id` | character | Sample barcode. Links to `00_sample_ids_UKZN_workshop_2023.csv`. |
+| `cytokine`  | character | Cytokine name (same panel as the Luminex datasets: `IL-1a`, `IL-6`, `TNFa`, `IFN-Y`, `IL-8`, `IL-10`, `IP-10`, `MIG`, `MIP-3a`, `IL-1b`). |
+| `conc`      | numeric  | Concentration (pg/mL). |
+| `limits`    | character | `within limits` (reliable) or `out of range` (below/above curve). |
+
+Long format — one row per cytokine per sample.
+
+---
+
+## `04_flow_cytometry_UKZN_workshop_2023.csv`
+
+```{r}
+flow_inst <- read_csv("../data/instructional_dataset/04_flow_cytometry_UKZN_workshop_2023.csv")
+glimpse(flow_inst)
+```
+
+**One row =** immune‑cell counts from one sample. Same flow‑cytometry panel as
+the menstruation study.
+
+| Column               | Type     | Meaning |
+|----------------------|----------|---------|
+| `sample_id`          | character | Sample barcode. |
+| `live_cd19_negative` | numeric  | Total live cells minus CD19⁺ events (gating parent). |
+| `cd45_negative`      | numeric  | CD45⁻ (non‑leukocyte) cells. |
+| `cd45_positive`      | numeric  | CD45⁺ leukocytes. |
+| `neutrophils`        | numeric  | Neutrophils (innate immune cells). |
+| `non_neutrophils`    | numeric  | Leukocytes that are not neutrophils. |
+| `cd3_negative`       | numeric  | Leukocytes that are CD3⁻ (not T‑cells). |
+| `cd3_positive`       | numeric  | Leukocytes that are CD3⁺ (T‑cells). |
+| `cd4_t_cells`        | numeric  | CD4⁺ helper T‑cells. |
+| `cd8_t_cells`        | numeric  | CD8⁺ cytotoxic T‑cells. |
+
+---
+
+# Modeling — Sorghum time‑course {#sec-sorghum}
+
+## `01-sorghum_timecourse.csv`
+
+```{r}
+sorghum <- read_csv("../data/modeling/01-sorghum_timecourse.csv")
+glimpse(sorghum)
+```
+
+**One row =** one RNA‑seq measurement from one sorghum sample at one time
+point.
+
+| Column                     | Type      | Meaning |
+|----------------------------|-----------|---------|
+| `Sobic.001G062300.v3.1` …  | numeric   | Expression values (read counts or normalized counts) for 9 individual sorghum genes. Column names are gene IDs from the Sorghum bicolor genome v3.1. |
+| `Barcode`                  | character | Sequencing library barcode (identifies the sample in the sequencing run). |
+| `libraryName`              | character | Library name (e.g. `BOCAX`, `BOCGY`). |
+| `Block`                    | character | Field block (design control for spatial effects). |
+| `Week`                     | numeric   | Week number (2–14) of the time‑course harvest. |
+| `Replicate`                | numeric   | Biological replicate number (1–4). |
+| `Genotype`                 | character | Sorghum variety: `RT430` (stay‑green) or `BT642`. |
+| `Condition`                | character | Water regime: `Preflowering` (drought before flowering), `Postflowering` (drought after flowering), or `Control` (well‑watered). |
+| `Sample.type`              | character | Tissue sampled: `Leaves`. |
+| `Day`                      | character | Harvest label, e.g. `Day21`. |
+| `Row`                      | character | Field row. |
+| `isFloweringWeek`          | logical   | `TRUE` if this sample was harvested during the plant's flowering week. |
+| `Date.Harvested`           | character | Calendar harvest date (mm/dd/yy). |
+| `Collection.Time`          | character | Time of day harvested. |
+| `No.plants.pooled`         | numeric   | Number of plants pooled into this sample. |
+| `FloweringJulianDate`      | numeric   | Julian day (day of year) when the plant flowered. |
+| `FloweringDate`            | character | Calendar date when the plant flowered. |
+| `FloweringWeek`            | numeric   | Week number when flowering occurred. |
+| `FloweringDay`             | numeric   | Day of week when flowering occurred. |
+| `Unreplicated`             | logical   | `TRUE` if this sample was not replicated. |
+| `CompleteSampleTreatment`  | character | Concatenation of genotype, condition, and week, e.g. `RT430:03:Preflowering`. |
+| `Timepoint`                | numeric   | Week number (same as `Week`, used for modeling). |
+| `Group`                    | character | Genotype and condition combined, e.g. `RT430:Preflowering`. |
+
+---
+
+# Quick-reference: which files link to which {#sec-links}
+
+```{r}
+#| label: tbl-links
+#| tbl-cap: "Foreign-key links between files (which column joins them)."
+
+tribble(
+  ~Dataset,                   ~Link_column,    ~Joins_to,
+  # -- Yogurt --
+  "01_participant_metadata_yogurt.csv",  "pid",      "00_sample_ids_yogurt.csv (pid)",
+  "02_qpcr_results_yogurt.csv",         "sample_id","00_sample_ids_yogurt.csv (sample_id)",
+  "03_luminex_results_yogurt.csv",      "sample_id","00_sample_ids_yogurt.csv (sample_id)",
+  # -- Menstruation --
+  "01_participant_metadata_period.csv", "pid",      "00_sample_ids_period.csv (pid)",
+  "02_luminex_period.csv",              "sample_id","00_sample_ids_period.csv (sample_id)",
+  "03_flow_cytometry_period.csv",       "sample_id","00_sample_ids_period.csv (sample_id)",
+  # -- Instructional --
+  "01_participant_metadata_UKZN*.csv",  "pid",      "00_sample_ids_UKZN*.csv (pid)",
+  "02_visit_clinical_measurements*.csv","pid",      "00_sample_ids_UKZN*.csv (pid)",
+  "03_elisa_cytokines_UKZN*.csv",      "sample_id","00_sample_ids_UKZN*.csv (sample_id)",
+  "04_flow_cytometry_UKZN*.csv",       "sample_id","00_sample_ids_UKZN*.csv (sample_id)"
+) |>
+  knitr::kable()
+```

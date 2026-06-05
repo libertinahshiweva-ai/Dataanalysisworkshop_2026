@@ -26,15 +26,15 @@ table_02
 
 **1. How many rows? What does one row represent?**
 
-*Your answer:*
+*Your answer:*132, EACH ROW TELLS YOU THE OUTCOME OF ONE PARTICULAR PATIENT IN TIME  
 
 **2. After `table_02 |> filter(time_point == "baseline")`, how many rows? What does each row represent now?**
 
-*Your answer:*
+*Your answer:*44 ROWS, SINGLE PID PER BASELINE
 
 **3. After `table_02 |> count(arm)`, how many rows? What does each row represent now?**
 
-*Your answer:*
+*Your answer:*2, PLACEBO AND TREATMENT OF ARM 
 
 ## Part 2 — Build the pipeline
 
@@ -42,23 +42,28 @@ Each step adds one verb on top of the previous pipeline. Run after each step.
 
 ```{r}
 # step 1: pipe table_02 into head()
-```
+table_02 |>head()
+
+
 
 ```{r}
 # step 2: filter to the baseline time point
+
+table_02 |> filter(time_point == "baseline")
+
+```{r}
+# step 3: 
+table_02 |> select(time_point == "id, arm, pid, nugent_score, crp_blood")
 ```
 
 ```{r}
-# step 3: add select() for pid, arm, ph, nugent_score, crp_blood
-```
-
-```{r}
-# step 4: add mutate() for high_ph = if_else(ph >= 4.5, "yes", "no")
+# step 4: add 
+table_02 |> mutate()high_ph = if_else(ph >= 4.5, "yes", "no")
 ```
 
 ```{r}
 # step 5: add arrange(desc(ph))
-```
+```arrange(desc(ph))
 
 ```{r}
 # step 6: assign the final pipeline to early_visit, then print it

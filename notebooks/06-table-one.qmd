@@ -30,7 +30,8 @@ For each non-pid column of `table_01` (`arm`, `smoker`, `age`, `education`, `sex
 
 **1. `arm`**
 
-- How will `tbl_summary(by = arm)` summarise it? *Your answer:*
+- How will `tbl_summary(by = arm)` summarise it? *Your answer:*arm
+
 - What test will `add_p()` pick? *Your answer:*
 
 **2. `smoker`**
